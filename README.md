@@ -2,6 +2,19 @@
   <img src="https://github.com/HIM049/BADownloaderUI/assets/67405384/b680bc86-5b41-4238-85ad-f50bf975bd07"/>
 </div>
 
+### Personal update-Audio downloader
+
+增加功能：自动获得发布时间并写入metadata
+
+TO-DO:
+
+- [x] 自动复制到Plex文件结构
+- [ ] 刮削作者照片并添加
+- [ ] 构建docker
+
+
+
+
 # Bili Audio Downloader UI - 使用 wails CLI 重构的全新版本
 
 考虑到以往 Bili Audio Downloader 使用命令行操作的不便，于是有了这个完全重构的带 UI 版本！  

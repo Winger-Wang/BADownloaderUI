@@ -5,9 +5,14 @@ import (
 	"html/template"
 	"os"
 	"path"
+	// "path/filepath"
 	"strconv"
+	"time"
+	"os/exec"
 
 	tag "github.com/gcottom/audiometa"
+	// tag_flac "github.com/gcottom/flacmeta"
+	// tag_mp3 "github.com/gcottom/mp3meta"
 )
 
 // 修改 TAG
@@ -18,6 +23,8 @@ func ChangeTag(cfg *Config, opt *DownloadOption, v *VideoInformation) error {
 	songCover := cfg.FileConfig.CachePath + "/cover/" + strconv.Itoa(v.Cid) + ".jpg"
 	songName := v.Meta.SongName
 	songAuthor := v.Meta.Author
+	// turn publishTime (string) to the publishTime (int64)
+	publishTime, _ := strconv.ParseInt(v.PublishTime, 10, 64)
 
 	// 打开歌曲元数据
 	tags, err := tag.OpenTag(file)
@@ -41,6 +48,12 @@ func ChangeTag(cfg *Config, opt *DownloadOption, v *VideoInformation) error {
 		tags.SetArtist(songAuthor)
 	}
 
+	// 这里开始是我添加的代码，用于修改歌曲的发布时间和专辑名
+	// 专辑名
+	tags.SetAlbum(songName)
+	publishDate := time.Unix(publishTime, 0).Format("2006-01-02")
+	publishYear := time.Unix(publishTime, 0).Year()
+	
 	// TODO: 将歌曲 tag 数据整理为结构体
 	// TODO: 修改作词人，作曲人等，以及自动适配
 
@@ -49,6 +62,49 @@ func ChangeTag(cfg *Config, opt *DownloadOption, v *VideoInformation) error {
 	if err != nil {
 		return err
 	}
+
+	// use ffmpeg to change metadata of release time
+	mv := exec.Command("mv", file, file + ".temp." + v.Format)
+	err = mv.Run()
+	if err != nil {
+		return err
+	}
+    cmd := exec.Command("ffmpeg", "-i", file+".temp."+v.Format, "-metadata", "date="+publishDate, "-metadata", "year="+strconv.Itoa(publishYear), "-y", file)
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	// // 发布时间
+	// // turn publishTime (timeStamp) to the publishYear
+	// publishDate := time.Unix(publishTime, 0).Format("2006-01-02")
+	// publishYear := time.Unix(publishTime, 0).Year()
+    // // tags.SetYear(strconv.Itoa(publishYear))
+	// // mp3
+	// if v.Format == AudioType.mp3 {
+	// 	// open the mp3 file using the mp3meta decoder
+	// 	mp3file, _ := os.Open(file)
+	// 	tags, err := tag_mp3.ParseMP3(mp3file)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	tags.SetYear(publishYear)
+	// 	tag_mp3.SaveMP3(tags, mp3file)
+	// 	mp3file.Close()
+	// }
+	// // flac
+	// if v.Format == AudioType.flac {
+	// 	// open the flac file using the flacmeta decoder
+	// 	flacfile, _ := os.Open(file)
+	// 	tags, err := tag_flac.ReadFLAC(flacfile)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	tags.SetTitle("Test title")
+	// 	tags.SetDate(publishDate)
+	// 	tags.Save(flacfile)
+	// 	flacfile.Close()
+	// }
 
 	return nil
 }

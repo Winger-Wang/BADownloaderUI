@@ -11,6 +11,7 @@ import (
 
 type Video struct {
 	Bvid string `json:"bvid"`
+	PublishTime string `json:"publishTime"` // 发布时间
 	Meta struct {
 		Title      string `json:"title"`       // 视频标题
 		Cover      string `json:"cover"`       // 封面
@@ -75,6 +76,7 @@ func (v *Video) Query(sessdata, bvid string) error {
 	v.Up.Mid = int(gjson.Get(json, "data.owner.mid").Int())                      // UP MID
 	v.Up.Name = gjson.Get(json, "data.owner.name").String()                      // UP 昵称
 	v.Up.Avatar = gjson.Get(json, "data.owner.face").String()                    // UP 头像
+	v.PublishTime = gjson.Get(json, "data.pubdate").String()                     // 发布时间
 
 	// 根据分 P 数量写入对应信息
 	for i := 0; i < int(gjson.Get(json, "data.videos").Int()); i++ {

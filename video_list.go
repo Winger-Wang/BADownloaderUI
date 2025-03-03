@@ -24,6 +24,7 @@ type VideoInformation struct {
 	PartId    int    `json:"part_id"`
 	IsAudio   bool   `json:"is_audio"`
 	Delete    bool   `json:"delete"`
+	PublishTime string `json:"publishTime"` // 发布时间
 	Audio     AudioInformation
 	Meta      MetaInformation
 }
@@ -73,6 +74,8 @@ func (VideoList *VideoList) AddVideo(sessdata, bvid string, downloadCompilation 
 		list.Delete = false
 		// list.Meta.Lyrics_path =
 
+		list.PublishTime = video.PublishTime // 发布时间
+		
 		list.IsAudio = false
 
 		// 处理音频标题（单 P 视频）
