@@ -136,15 +136,39 @@ func (a *App) ListDownload(listPath string, opt DownloadOption) error {
 				fileName.Format = v.Format
 			}
 
-			// 写入元数据
-			if v.Format != AudioType.flac {
-				fileName.Quality = "normal"
-				err = ChangeTag(cfg, &opt, &v)
+			// 处理 flac 文件
+			if v.Format == AudioType.flac {
+				wails.LogInfof(a.ctx, "(队列%d) 处理 flac 文件", num)
+				err = HandleFlacMetadata(musicPathAndName+AudioType.flac)
 				if err != nil {
-					wails.LogErrorf(a.ctx, "(队列%d) 写入元数据时发生错误：%s", num, err)
+					wails.LogErrorf(a.ctx, "处理 flac 文件时发生错误：%s", err)
 				} else {
-					wails.LogInfof(a.ctx, "(队列%d) 写入元数据成功", num)
+					wails.LogInfof(a.ctx, "(队列%d) 处理 flac 文件成功", num)
 				}
+			}
+
+			// // 写入元数据
+			// if v.Format != AudioType.flac {
+			// 	fileName.Quality = "normal"
+			// 	err = ChangeTag(cfg, &opt, &v)
+			// 	if err != nil {
+			// 		wails.LogErrorf(a.ctx, "(队列%d) 写入元数据时发生错误：%s", num, err)
+			// 	} else {
+			// 		wails.LogInfof(a.ctx, "(队列%d) 写入元数据成功", num)
+			// 	}
+			// }
+
+			// 写入元数据
+			if v.Format == AudioType.flac {
+				fileName.Quality = "hires"
+			} else {
+				fileName.Quality = "normal"
+			}
+			err = ChangeTag(cfg, &opt, &v)
+			if err != nil {
+				wails.LogErrorf(a.ctx, "(队列%d) 写入元数据时发生错误：%s", num, err)
+			} else {
+				wails.LogInfof(a.ctx, "(队列%d) 写入元数据成功", num)
 			}
 
 			// 输出文件

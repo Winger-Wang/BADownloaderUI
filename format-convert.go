@@ -50,3 +50,22 @@ func ConventFile(inputFile, outputFile string) error {
 	}
 	return nil
 }
+
+// 处理flac metadata (清除metadata)
+func HandleFlacMetadata(inputFile string) error {
+	// mv inputFile tmp.flac
+	// ffmpeg -i tmp.flac -c:a flac -map_metadata -1 -y outputFile
+	tmpFile := inputFile + ".tmp.flac"
+	err := exec.Command("mv", inputFile, tmpFile).Run()
+	if err != nil {	// 如果移动失败
+		return err
+	}
+	stream := ffmpeg.Input(tmpFile).Output(inputFile, ffmpeg.KwArgs{"c:a": "flac", "map_metadata": "-1"})
+	cmd := stream.Compile()
+	setHideWindow(cmd)
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
+}
